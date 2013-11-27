@@ -3,8 +3,10 @@ package gridworld;
 public class Cell {
 	public double reward;
 	public double utility;
+	public double newUtility;
 	public boolean wall;
-	public int action;
+	public boolean goal;
+	public Action action;
 	
 	public static enum Action {
 		LEFT, UP, RIGHT, DOWN
@@ -13,13 +15,9 @@ public class Cell {
 	public Cell() {
 		this.reward = 0;
 		this.utility = 0;
+		this.newUtility = 0;
 		this.wall = false;
-	}
-	
-	public Cell(double reward, double utility, boolean isWall) {
-		this.reward = reward;
-		this.utility = utility;
-		this.wall = isWall;
+		this.goal = false;
 	}
 	
 	public static String actionToString(Action ac) {

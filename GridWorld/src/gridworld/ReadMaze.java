@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class ReadMaze {
 	public Cell[][] maze = new Cell[6][6];
 	
-	public ReadMaze(String filePath) {        
+	public ReadMaze(String filePath, double nonTerminalReward) {        
         try {
 	        FileReader f = new FileReader(filePath);
 	        BufferedReader b = new BufferedReader(f);
@@ -25,9 +25,9 @@ public class ReadMaze {
 	        		Cell c = new Cell();
 	        		tmp = matcher.group();
 	        		if (tmp.contentEquals("s")) {
-	        			c.reward = -0.04;
+	        			c.reward = nonTerminalReward;
 	        		} else if (tmp.contentEquals("b")) {
-	        			c.reward = -0.04;
+	        			c.reward = nonTerminalReward;
 	        		} else if (tmp.contentEquals("%")) {
 	        			c.wall = true;
 	        		} else {
@@ -37,6 +37,7 @@ public class ReadMaze {
 	        			int n = Integer.parseInt(tmp);
 	        			c.reward = n;
 	        			c.utility = n;
+	        			c.goal = true;
 	        		}
 	        		maze[i][j] = c;
 	        		j++;
@@ -51,19 +52,4 @@ public class ReadMaze {
 			ex.printStackTrace();
 	    }
     }
-	
-	public void printMaze() {
-		String niceOutput;
-		for (int i = 0; i < maze.length; i++) {
-			for (int j = 0; j < maze[i].length; j++) {
-				if (maze[i][j].wall) {
-					niceOutput = String.format("%1$5s", "%%%");
-				} else {
-					niceOutput = String.format("%1$5.1f", maze[i][j].utility);
-				}
-                System.out.print(niceOutput);
-			}
-			System.out.println();
-		}
-	}
 }
