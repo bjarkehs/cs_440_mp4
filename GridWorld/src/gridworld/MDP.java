@@ -20,7 +20,7 @@ public class MDP {
 			iter++;
 			for (int i = 0; i < maze.length; i++) {
 				for (int j = 0; j < maze[i].length; j++) {
-					System.out.println("Location: " + i + "," + j);
+//					System.out.println("Location: " + i + "," + j);
 					if (shouldSkip(maze[i][j])) {
 						continue;
 					}
@@ -32,8 +32,8 @@ public class MDP {
 						if (sum > max) {
 							max = sum;
 							maze[i][j].action = ac;
-							System.out.println("Action: " +ac);
-							System.out.println("Sum: " +sum);
+//							System.out.println("Action: " +ac);
+//							System.out.println("Sum: " +sum);
 						}
 					}
 					maze[i][j].newUtility = maze[i][j].reward + gamma*max;
@@ -46,8 +46,8 @@ public class MDP {
 					}
 					BigDecimal uti = new BigDecimal(maze[i][j].utility, new MathContext(precision));
 					BigDecimal newUti = new BigDecimal(maze[i][j].newUtility, new MathContext(precision));
-					System.out.println(uti);
-					System.out.println(newUti);
+//					System.out.println(uti);
+//					System.out.println(newUti);
 					if (uti.compareTo(newUti) == 0) {
 						continueLoop = false;
 					}
@@ -55,7 +55,6 @@ public class MDP {
 				}
 			}
 		}
-		System.out.println(iter);
 		return iter;
 	}
 	
