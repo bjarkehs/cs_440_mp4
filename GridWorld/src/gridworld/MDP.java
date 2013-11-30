@@ -1,5 +1,8 @@
 package gridworld;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 import gridworld.Cell.Action;
 
 public class MDP {
@@ -10,39 +13,27 @@ public class MDP {
 	}
 	
 	public int valueIteration(double gamma) {
-		int iter = 1;
-		while(true) {
+		int precision = 17;
+		int iter = 0;
+		boolean continueLoop = true;
+		while(continueLoop) {
+			iter++;
 			for (int i = 0; i < maze.length; i++) {
 				for (int j = 0; j < maze[i].length; j++) {
-					if (maze[i][j].wall) {
+					System.out.println("Location: " + i + "," + j);
+					if (shouldSkip(maze[i][j])) {
 						continue;
 					}
-					double max = Integer.MIN_VALUE;
+					double max = Double.NEGATIVE_INFINITY;
 					for (Action ac : Action.values()) {
 						double sum = 0;
-						if (ac == Action.LEFT) {
-							sum += getUtility(i, j-1)*0.8; // LEFT
-							sum += getUtility(i-1, j)*0.1; // UP
-							sum += getUtility(i+1, j)*0.1; // DOWN
-						}
-						if (ac == Action.RIGHT) {
-							sum += getUtility(i, j+1)*0.8; // RIGHT
-							sum += getUtility(i-1, j)*0.1; // UP
-							sum += getUtility(i+1, j)*0.1; // DOWN
-						}
-						if (ac == Action.UP) {
-							sum += getUtility(i-1, j)*0.8; // UP
-							sum += getUtility(i, j+1)*0.1; // RIGHT
-							sum += getUtility(i, j-1)*0.1; // LEFT
-						}
-						if (ac == Action.DOWN) {
-							sum += getUtility(i+1, j)*0.8; // DOWN
-							sum += getUtility(i, j+1)*0.1; // RIGHT
-							sum += getUtility(i, j-1)*0.1; // LEFT
-						}
+						sum = getSumOfDirection(i, j, ac);
+//						System.out.println(ac + " is: " + sum);
 						if (sum > max) {
 							max = sum;
 							maze[i][j].action = ac;
+							System.out.println("Action: " +ac);
+							System.out.println("Sum: " +sum);
 						}
 					}
 					maze[i][j].newUtility = maze[i][j].reward + gamma*max;
@@ -50,15 +41,85 @@ public class MDP {
 			}
 			for (int i = 0; i < maze.length; i++) {
 				for (int j = 0; j < maze[i].length; j++) {
+					if (shouldSkip(maze[i][j])) {
+						continue;
+					}
+					BigDecimal uti = new BigDecimal(maze[i][j].utility, new MathContext(precision));
+					BigDecimal newUti = new BigDecimal(maze[i][j].newUtility, new MathContext(precision));
+					System.out.println(uti);
+					System.out.println(newUti);
+					if (uti.compareTo(newUti) == 0) {
+						continueLoop = false;
+					}
 					maze[i][j].utility = maze[i][j].newUtility;
 				}
 			}
-			iter++;
-			if (iter > 100) {
-				break;
-			}
 		}
+		System.out.println(iter);
 		return iter;
+	}
+	
+	private boolean shouldSkip(Cell c) {
+		if (c.wall || c.goal) {
+//		if (c.wall) {
+			return true;
+		}
+		return false;
+	}
+	
+	private double getSumOfDirection(int i, int j, Action ac) {
+		double sum = 0;
+		if (ac == Action.LEFT) {
+			sum += getUtilityForDirection(i, j, Action.LEFT)*0.8; // LEFT
+			sum += getUtilityForDirection(i, j, Action.UP)*0.1; // UP
+			sum += getUtilityForDirection(i, j, Action.DOWN)*0.1; // DOWN
+		}
+		if (ac == Action.RIGHT) {
+			sum += getUtilityForDirection(i, j, Action.RIGHT)*0.8; // RIGHT
+			sum += getUtilityForDirection(i, j, Action.UP)*0.1; // UP
+			sum += getUtilityForDirection(i, j, Action.DOWN)*0.1; // DOWN
+		}
+		if (ac == Action.UP) {
+			sum += getUtilityForDirection(i, j, Action.UP)*0.8; // UP
+			sum += getUtilityForDirection(i, j, Action.RIGHT)*0.1; // RIGHT
+			sum += getUtilityForDirection(i, j, Action.LEFT)*0.1; // LEFT
+		}
+		if (ac == Action.DOWN) {
+			sum += getUtilityForDirection(i, j, Action.DOWN)*0.8; // DOWN
+			sum += getUtilityForDirection(i, j, Action.RIGHT)*0.1; // RIGHT
+			sum += getUtilityForDirection(i, j, Action.LEFT)*0.1; // LEFT
+		}
+		return sum;
+	}
+	
+	private double getUtilityForDirection(int i, int j, Action ac) {
+		int endI = i;
+		int endJ = j;
+		if (ac == Action.LEFT) {
+			endJ--;
+		}
+		if (ac == Action.RIGHT) {
+			endJ++;
+		}
+		if (ac == Action.DOWN) {
+			endI++;
+		}
+		if (ac == Action.UP) {
+			endI--;
+		}
+		int[] rowAndCol = getState(i, j, endI, endJ);
+		return getUtility(rowAndCol[0], rowAndCol[1]);
+	}
+	
+	private int[] getState(int startI, int startJ, int endI, int endJ) {
+		int[] result = new int[2];
+		result[0] = endI;
+		result[1] = endJ;
+		if (endI < 0 || endI > 5 || endJ < 0 || endJ > 5 || maze[endI][endJ].wall) {
+			result[0] = startI;
+			result[1] = startJ;
+		}
+		return result;
 	}
 	
 	private double getUtility(int i, int j) {
@@ -89,16 +150,31 @@ public class MDP {
 		}
 	}
 	
+	public void printRewards() {
+		String niceOutput;
+		for (int i = 0; i < maze.length; i++) {
+			for (int j = 0; j < maze[i].length; j++) {
+//				if (maze[i][j].wall) {
+//					niceOutput = String.format("%1$8s", "%%%");
+//				} else {
+					niceOutput = String.format("%1$8.3f", maze[i][j].reward);
+//				}
+                System.out.print(niceOutput);
+			}
+			System.out.println();
+		}
+	}
+	
 	public void printPolicy() {
 		String niceOutput;
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[i].length; j++) {
 				if (maze[i][j].wall) {
-					niceOutput = String.format("%1$4s", "%");
+					niceOutput = String.format("%1$5s", "%");
 				} else if (maze[i][j].goal) {
-					niceOutput = String.format("%1$4.0f", maze[i][j].reward);
+					niceOutput = String.format("%1$5.0f", maze[i][j].reward);
 				} else {
-					niceOutput = String.format("%1$4s", Cell.actionToString(maze[i][j].action));
+					niceOutput = String.format("%1$5s", Cell.actionToString(maze[i][j].action));
 				}
                 System.out.print(niceOutput);
 			}

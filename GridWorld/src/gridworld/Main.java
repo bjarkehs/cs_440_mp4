@@ -1,5 +1,4 @@
 package gridworld;
-import gridworld.Cell.Action;
 
 
 public class Main {
@@ -9,9 +8,8 @@ public class Main {
 		MDP m = new MDP(rm.maze);
 		m.printMaze();
 		System.out.println();
-		m.valueIteration(0.7);
+		m.valueIteration(0.99);
 		m.printMaze();
 		m.printPolicy();
-		System.out.println(Cell.actionToString(Action.RIGHT));
 	}
 }
