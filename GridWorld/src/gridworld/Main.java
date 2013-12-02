@@ -8,9 +8,8 @@ public class Main {
 		MDP m = new MDP(rm.maze);
 		m.printMaze();
 		System.out.println();
-		int i = m.valueIteration(0.99);
-		m.printMaze();
-		m.printPolicy();
-		System.out.println("Number of iterations: " + i);
+		m.valueIteration(0.99);
+		m.printResults();
+		System.out.println("DONE");
 	}
 }

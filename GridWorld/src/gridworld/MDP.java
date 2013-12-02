@@ -7,6 +7,7 @@ import gridworld.Cell.Action;
 
 public class MDP {
 	public Cell[][] maze;
+	public int iterations;
 	
 	public MDP(Cell[][] maze) {
 		this.maze = maze;
@@ -14,10 +15,10 @@ public class MDP {
 	
 	public int valueIteration(double gamma) {
 		int precision = 17;
-		int iter = 0;
+		iterations = 0;
 		boolean continueLoop = true;
 		while(continueLoop) {
-			iter++;
+			iterations++;
 			for (int i = 0; i < maze.length; i++) {
 				for (int j = 0; j < maze[i].length; j++) {
 //					System.out.println("Location: " + i + "," + j);
@@ -55,7 +56,7 @@ public class MDP {
 				}
 			}
 		}
-		return iter;
+		return iterations;
 	}
 	
 	private boolean shouldSkip(Cell c) {
@@ -179,5 +180,37 @@ public class MDP {
 			}
 			System.out.println();
 		}
+	}
+	
+	public void printReport() {
+		System.out.println("Printing the values as '(row, column): utility'");
+		for (int i = 0; i < maze.length; i++) {
+			for (int j = 0; j < maze[i].length; j++) {
+				if (shouldSkip(maze[i][j])) {
+					continue;
+				}
+				System.out.println("("+i+", "+j+"): "+ maze[i][j].utility);
+			}
+		}
+	}
+	
+	public void printReferenceLikeReport() {
+		System.out.println("Printing the values as '(column, row): utility' as the reference values");
+		for (int j = 0; j < maze[0].length; j++) {
+			for (int i = 0; i < maze.length; i++) {
+				if (shouldSkip(maze[i][j])) {
+					continue;
+				}
+				System.out.println("("+j+", "+i+"): "+ maze[i][j].utility);
+			}
+		}
+	}
+	
+	public void printResults() {
+		printMaze();
+		printPolicy();
+		System.out.println("Number of iterations: " + iterations);
+//		printReport();
+		printReferenceLikeReport();
 	}
 }
