@@ -1,20 +1,20 @@
 package gridworld;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
+//import java.math.BigDecimal;
+//import java.math.MathContext;
 
 import gridworld.Cell.Action;
 
 public class MDP {
 	public Cell[][] maze;
 	public int iterations;
+	public double convFactor = 0.000001;
 	
 	public MDP(Cell[][] maze) {
 		this.maze = maze;
 	}
 	
 	public int valueIteration(double gamma) {
-		int precision = 17;
 		iterations = 0;
 		boolean continueLoop = true;
 		while(continueLoop) {
@@ -40,19 +40,35 @@ public class MDP {
 					maze[i][j].newUtility = maze[i][j].reward + gamma*max;
 				}
 			}
+			double error = 0;
 			for (int i = 0; i < maze.length; i++) {
 				for (int j = 0; j < maze[i].length; j++) {
 					if (shouldSkip(maze[i][j])) {
 						continue;
 					}
-					BigDecimal uti = new BigDecimal(maze[i][j].utility, new MathContext(precision));
-					BigDecimal newUti = new BigDecimal(maze[i][j].newUtility, new MathContext(precision));
-//					System.out.println(uti);
-//					System.out.println(newUti);
-					if (uti.compareTo(newUti) == 0) {
-						continueLoop = false;
+					error += Math.pow((maze[i][j].newUtility-maze[i][j].utility), 2);
+				}
+			}
+			error = Math.sqrt(error);
+			System.out.println("ERROR = "+error);
+			if (error <= convFactor) {
+				continueLoop = false;
+			}
+			else {
+				for (int i = 0; i < maze.length; i++) {
+					for (int j = 0; j < maze[i].length; j++) {
+						if (shouldSkip(maze[i][j])) {
+							continue;
+						}
+	//					BigDecimal uti = new BigDecimal(maze[i][j].utility, new MathContext(precision));
+	//					BigDecimal newUti = new BigDecimal(maze[i][j].newUtility, new MathContext(precision));
+	////					System.out.println(uti);
+	////					System.out.println(newUti);
+	//					if (uti.compareTo(newUti) == 0) {
+	//						continueLoop = false;
+	//					}
+						maze[i][j].utility = maze[i][j].newUtility;
 					}
-					maze[i][j].utility = maze[i][j].newUtility;
 				}
 			}
 		}
