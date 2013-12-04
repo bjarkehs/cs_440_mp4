@@ -10,6 +10,16 @@ public class Main {
 		System.out.println();
 		m.valueIteration(0.99);
 		m.printResults();
-		System.out.println("DONE");
+		System.out.println("DONE with Value Iteration");
+		double[][] trueUtilities = m.getUtilities();
+		
+		QReadMaze qrm = new QReadMaze("maze.txt", -0.04);
+		int Ne = 5;
+		double Rplus = 2;
+		int alphaValue = 60;
+		QLearning qm = new QLearning(qrm.maze, qrm.startCell, Ne, Rplus, alphaValue, trueUtilities);
+		qm.runAlgorithm(0.99);
+		m.printResults();
+		System.out.println("DONE with Q-Learning");
 	}
 }
