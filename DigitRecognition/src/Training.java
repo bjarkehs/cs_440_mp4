@@ -1,57 +1,158 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+//import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
 
 
 public class Training {
-	public List<Digit> trainingData;
-	public int totalSamples;
+	public List<Digit> digits;
+	public List<Image> images;
+	public int alphaParameter;
+	public int[][] hitMatrix;
+	public double[][] confusionMatrix;
+	public List<Integer> epochAccuracy;
+	public boolean bias;
 	
-	public Training() {
-		trainingData = new ArrayList<Digit>();
-		totalSamples = 0;
-		for (int i = 0; i < 10; i++) {
-			trainingData.add(new Digit(i));
+	public Training(List<Image> images, List<Digit> digits, int alphaParameter) {
+		this.alphaParameter = alphaParameter;
+		this.images = images;
+		this.digits = digits;
+		epochAccuracy = new ArrayList<Integer>();
+	}
+	
+	public void trainData(int epoch) {
+		for (int step = 1; step <= epoch; step++) {
+			Queue<Image> queueOfImages = new ArrayDeque<Image>();
+			queueOfImages.addAll(images);
+//			Collections.shuffle(listOfImages);
+			int totalIncorrect = 0;
+			hitMatrix = new int[10][10];
+			confusionMatrix = new double[10][10];
+			Image img = null;
+			while (queueOfImages.size() > 0) {
+				img = queueOfImages.poll();
+//				img.printImage();
+				double maxC = Double.NEGATIVE_INFINITY;
+				int maxLabel = -1;
+				for (int k = 0; k < digits.size(); k++) {
+					double c = 0;
+					Digit d = digits.get(k);
+					for (int i = 0; i < img.features.length; i++) {
+						for (int j = 0; j < img.features[0].length; j++) {
+							c += d.weight[i][j] * img.features[i][j];
+						}
+					}
+					if (c > maxC) {
+						maxC = c;
+						maxLabel = d.label;
+					}
+				}
+				if (maxLabel != img.label) {
+					// Incorrect classification
+					totalIncorrect++;
+					Digit guessed = digits.get(maxLabel);
+					Digit correct = digits.get(img.label);
+					for (int i = 0; i < img.features.length; i++) {
+						for (int j = 0; j < img.features[0].length; j++) {
+							correct.weight[i][j] = correct.weight[i][j] + getAlpha(step) * img.features[i][j];
+							guessed.weight[i][j] = guessed.weight[i][j] - getAlpha(step) * img.features[i][j];
+						}
+					}
+				}
+				hitMatrix[img.label][maxLabel]++;
+			}
+			calculateConfusionMatrix();
+			printEpoch(step);
+			epochAccuracy.add(images.size()-totalIncorrect);
+		}
+		printResult(epoch);
+	}
+	
+	public void printResult(int epoch) {
+		printTrainingCurve();
+	}
+	
+	public void printTrainingCurve() {
+		String niceOutput;
+		System.out.print("| ----------");
+		for (int k = 0; k < epochAccuracy.size(); k++) {
+			System.out.print("---------");
+		}
+		System.out.println(" |");
+		System.out.print("| Epoch:    ");
+		for (int k = 0; k < epochAccuracy.size(); k++) {
+			niceOutput = String.format("| %1$6s ", k+1);
+			System.out.print(niceOutput);
+		}
+		System.out.println(" |");
+		System.out.print("| ----------");
+		for (int k = 0; k < epochAccuracy.size(); k++) {
+			System.out.print("---------");
+		}
+		System.out.println(" |");
+		System.out.print("| Accuracy: ");
+		for (int i = 0; i < epochAccuracy.size(); i++) {
+			int correct = epochAccuracy.get(i);
+			double accuracy = (double)correct/(double)images.size()*100;
+			niceOutput = String.format("| %1$5.1f", accuracy);
+			System.out.print(niceOutput);
+			System.out.print("% ");
+		}
+		System.out.println(" |");
+		System.out.print("| ----------");
+		for (int k = 0; k < epochAccuracy.size(); k++) {
+			System.out.print("---------");
+		}
+		System.out.println(" |");
+	}
+	
+	public void printEpoch(int step) {
+		System.out.println("Epoch no. " + step);
+		printMatrix(confusionMatrix);
+		System.out.println();
+	}
+	
+	public double getAlpha(int step) {
+		if (alphaParameter == 1) {
+			return 1;
+		} else {
+			return (double)alphaParameter/(double)(alphaParameter+step);
 		}
 	}
 	
-	public void trainData() {
-		try {
-			File imgFile = new File("digitdata"+File.separator+"trainingimages");
-			BufferedReader imgInput = new BufferedReader(new FileReader(imgFile));
-			File labelFile = new File("digitdata"+File.separator+"traininglabels");
-			BufferedReader labelInput = new BufferedReader(new FileReader(labelFile));
-			String line;
-			int k = 0;
-			Digit d = new Digit();
-			while((line = imgInput.readLine()) != null) {
-				if (k == 0) {
-					int label = Integer.parseInt(labelInput.readLine());
-					d = this.trainingData.get(label);
-					d.samples++;
-					this.totalSamples++;
-				}
-				for (int j = 0; j < 28; j++) {
-					if (line.charAt(j) != ' ') {
-						d.feature[k][j]++;
-					}
-				}
-				k = (k+1) % 28;
+	public void calculateConfusionMatrix() {
+		for (int r = 0; r < 10; r++) {
+			Digit d = digits.get(r);
+			for (int c = 0; c < 10; c++) {
+				confusionMatrix[r][c] = ((double)hitMatrix[r][c]/(double)d.samples)*100;
 			}
-			imgInput.close();
-			labelInput.close();
 		}
-		catch(Exception e) {
-			e.printStackTrace();
+	}
+	
+	public void printMatrix(double[][] matrix) {
+		String niceOutput;
+		System.out.print("   ");
+		for (int k = 0; k < matrix[0].length; k++) {
+			niceOutput = String.format("%1$6s", k);
+			System.out.print(niceOutput);
+		}
+		System.out.println();
+		for (int i = 0; i < matrix.length; i++) {
+			niceOutput = String.format("%1$2s ", i);
+			System.out.print(niceOutput);
+			for (int j = 0; j < matrix[i].length; j++) {
+				niceOutput = String.format("%1$6.1f", matrix[i][j]);
+				System.out.print(niceOutput);
+			}
+			System.out.println();
 		}
 	}
 	
 	public void printTrainData() {
 		String niceOutput;
-		System.out.println("Total Samples: " + totalSamples);
-		for (Digit d : trainingData) {
+		System.out.println("Total Samples: " + images.size());
+		for (Digit d : digits) {
 			System.out.println("Label of digits: "+ d.label);
 			for (int i = 0; i < 28; i++) {
 				for (int j = 0; j < 28; j++) {
