@@ -9,11 +9,11 @@ public class Reading {
 	public List<Image> images;
 	public List<Digit> digits;
 
-	public Reading() {
+	public Reading(boolean randomizeWeights) {
 		images = new ArrayList<Image>();
 		digits = new ArrayList<Digit>();
 		for (int i = 0; i < 10; i++) {
-			digits.add(new Digit(i));
+			digits.add(new Digit(i, randomizeWeights));
 		}
 	}
 	

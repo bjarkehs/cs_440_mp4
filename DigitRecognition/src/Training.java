@@ -1,6 +1,6 @@
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-//import java.util.Collections;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
@@ -21,17 +21,18 @@ public class Training {
 		epochAccuracy = new ArrayList<Integer>();
 	}
 	
-	public void trainData(int epoch) {
+	public void trainData(int epoch, boolean randomizeImages) {
 		for (int step = 1; step <= epoch; step++) {
-			Queue<Image> queueOfImages = new ArrayDeque<Image>();
-			queueOfImages.addAll(images);
-//			Collections.shuffle(listOfImages);
+			List<Image> listOfImages = new ArrayList<Image>(images);
+			if (randomizeImages) {
+				Collections.shuffle(listOfImages);
+			}
 			int totalIncorrect = 0;
 			hitMatrix = new int[10][10];
 			confusionMatrix = new double[10][10];
 			Image img = null;
-			while (queueOfImages.size() > 0) {
-				img = queueOfImages.poll();
+			while (listOfImages.size() > 0) {
+				img = listOfImages.remove(0);
 //				img.printImage();
 				double maxC = Double.NEGATIVE_INFINITY;
 				int maxLabel = -1;
@@ -75,18 +76,18 @@ public class Training {
 	
 	public void printTrainingCurve() {
 		String niceOutput;
-		System.out.print("| ----------");
+		System.out.print("|-----------");
 		for (int k = 0; k < epochAccuracy.size(); k++) {
 			System.out.print("---------");
 		}
-		System.out.println(" |");
+		System.out.println("-|");
 		System.out.print("| Epoch:    ");
 		for (int k = 0; k < epochAccuracy.size(); k++) {
 			niceOutput = String.format("| %1$6s ", k+1);
 			System.out.print(niceOutput);
 		}
 		System.out.println(" |");
-		System.out.print("| ----------");
+		System.out.print("|-----------");
 		for (int k = 0; k < epochAccuracy.size(); k++) {
 			System.out.print("---------");
 		}
@@ -100,11 +101,11 @@ public class Training {
 			System.out.print("% ");
 		}
 		System.out.println(" |");
-		System.out.print("| ----------");
+		System.out.print("|___________");
 		for (int k = 0; k < epochAccuracy.size(); k++) {
-			System.out.print("---------");
+			System.out.print("_________");
 		}
-		System.out.println(" |");
+		System.out.println("_|");
 	}
 	
 	public void printEpoch(int step) {

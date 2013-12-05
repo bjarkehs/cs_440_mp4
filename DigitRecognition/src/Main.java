@@ -2,10 +2,10 @@
 public class Main {
 
 	public static void main(String[] args) {
-		Reading r = new Reading();
+		Reading r = new Reading(false);
 		r.readData();
-		Training tr = new Training(r.images, r.digits, 1000);
-		tr.trainData(5);
+		Training tr = new Training(r.images, r.digits, 1);
+		tr.trainData(5, false);
 		//tr.printTrainData();
 		
 		Testing te = new Testing(tr);
