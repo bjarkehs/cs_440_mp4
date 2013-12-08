@@ -19,7 +19,7 @@ public class Testing {
 		hitMatrix = new int[10][10];
 	}
 	
-	public boolean testData() {
+	public boolean testData(boolean binaryFeatures) {
 		try {
 			File imgFile = new File("digitdata"+File.separator+"testimages");
 			BufferedReader imgInput = new BufferedReader(new FileReader(imgFile));
@@ -37,8 +37,16 @@ public class Testing {
 					this.totalTests++;
 				}
 				for (int j = 0; j < 28; j++) { 
-					if (line.charAt(j) != ' ') {
-						testImage[n][j] = 1;
+					if (binaryFeatures) {
+						if (line.charAt(j) != ' ') {
+							testImage[n][j] = 1;
+						}
+					} else {
+						if (line.charAt(j) == '+') {
+							testImage[n][j] = 1;
+						} else if (line.charAt(j) == '#') {
+							testImage[n][j] = 2;
+						}
 					}
 				}
 				n = (n+1) % 28;

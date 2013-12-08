@@ -17,7 +17,7 @@ public class Reading {
 		}
 	}
 	
-	public void readData() {
+	public void readData(boolean binaryFeatures) {
 		try {
 			File imgFile = new File("digitdata"+File.separator+"trainingimages");
 			BufferedReader imgInput = new BufferedReader(new FileReader(imgFile));
@@ -34,8 +34,16 @@ public class Reading {
 					digits.get(label).samples++;
 				}
 				for (int j = 0; j < 28; j++) {
-					if (line.charAt(j) != ' ') {
-						tmpImage[k][j] = 1;
+					if (binaryFeatures) {
+						if (line.charAt(j) != ' ') {
+							tmpImage[k][j] = 1;
+						}
+					} else {
+						if (line.charAt(j) == '+') {
+							tmpImage[k][j] = 1;
+						} else if (line.charAt(j) == '#') {
+							tmpImage[k][j] = 2;
+						}
 					}
 				}
 				k = (k+1) % 28;

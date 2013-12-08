@@ -2,14 +2,15 @@
 public class Main {
 
 	public static void main(String[] args) {
+		boolean testWithBinaryFeatures = false;
 		Reading r = new Reading(false);
-		r.readData();
-		Training tr = new Training(r.images, r.digits, 1);
-		tr.trainData(5, false);
+		r.readData(testWithBinaryFeatures);
+		Training tr = new Training(r.images, r.digits, 1000);
+		tr.trainData(4, false);
 		//tr.printTrainData();
 		
 		Testing te = new Testing(tr);
-		te.testData();
+		te.testData(testWithBinaryFeatures);
 		te.printResults();
 //		
 //		ImageWindow i = new ImageWindow();
