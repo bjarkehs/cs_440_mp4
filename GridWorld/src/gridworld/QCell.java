@@ -10,6 +10,7 @@ public class QCell {
 	public int[] freqValues;
 	public int row;
 	public int col;
+	public boolean found;
 	
 	public static enum Action {
 		LEFT, UP, RIGHT, DOWN
@@ -22,6 +23,7 @@ public class QCell {
 		this.goal = false;
 		this.qValues = new double[Action.values().length];
 		this.freqValues = new int[Action.values().length];
+		this.found = false;
 		for (int i = 0; i < qValues.length; i++) {
 			qValues[i] = 0;
 			freqValues[i] = 0;

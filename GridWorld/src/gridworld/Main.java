@@ -14,12 +14,12 @@ public class Main {
 		double[][] trueUtilities = m.getUtilities();
 		
 		QReadMaze qrm = new QReadMaze("maze.txt", -0.04);
-		int Ne = 5;
+		int Ne = 10;
 		double Rplus = 2;
-		int alphaValue = 60;
+		int alphaValue = 1500;
 		QLearning qm = new QLearning(qrm.maze, qrm.startCell, Ne, Rplus, alphaValue, trueUtilities);
 		qm.runAlgorithm(0.99);
-		m.printResults();
+		qm.printResults();
 		System.out.println("DONE with Q-Learning");
 	}
 }

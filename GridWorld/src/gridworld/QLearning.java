@@ -33,16 +33,23 @@ public class QLearning {
 		while(true) {
 			if (currentCell.goal) {
 				// Save trial info.
+				if (!currentCell.found) {
+        			for (int k = 0; k < 4; k++) {
+        				currentCell.qValues[k] = currentCell.reward;
+        			}
+        			currentCell.found = true;
+				}
 				saveRMSE();
 				currentCell = startCell;
-				System.out.println("Trial over");
+				System.out.println(trials.size());
+//				if (trials.size() > 000000) {
 				if (hasConverged()) {
 					break;
 				}
 			}
 			steps++;
+//			System.out.println("Current state: " + currentCell.row + "," + currentCell.col);
 			Action a = getNextAction(currentCell);
-//			System.out.println("Action: " + a);
 			QCell nextCell = getState(currentCell, a);
 			currentCell.qValues[a.ordinal()] = currentCell.qValues[a.ordinal()] + getAlpha() * (currentCell.reward + gamma * getMaxQ(nextCell) - currentCell.qValues[a.ordinal()]);
 //			System.out.println(currentCell.qValues[a.ordinal()]);
@@ -70,8 +77,9 @@ public class QLearning {
 				sum += Math.pow((oldUtility-newUtility),2);
 			}
 		}
-		System.out.println("Sum " + sum);
+//		System.out.println("Sum " + sum);
 		double e = Math.sqrt(sum);
+		System.out.println(e);
 		if (e < convFactor) {
 			return true;
 		} else {
@@ -96,13 +104,16 @@ public class QLearning {
 	}
 	
 	private double getAlpha() {
-		return alphaValue/((alphaValue-1)+steps);
+		return (double)alphaValue/(double)((alphaValue-1)+steps);
 	}
 	
 	private Action getNextAction(QCell currentState) {
 		double max = Double.NEGATIVE_INFINITY;
 		Action maxAc = null;
 		for (Action ac : Action.values()) {
+//			if (currentState.row == 5 && currentState.col == 4) {
+//				System.out.println("here");
+//			}
 			double tmp = effFunction(currentState.qValues[ac.ordinal()], currentState.freqValues[ac.ordinal()]);
 //			System.out.println("Tmp: " + tmp + " ac: " + ac);
 			if (tmp > max) {
@@ -125,7 +136,11 @@ public class QLearning {
 	private double getMaxQ(QCell currentState) {
 		double max = Double.NEGATIVE_INFINITY;
 		for (Action ac : Action.values()) {
-			max = Math.max(currentState.qValues[ac.ordinal()], max);
+			double tmp = currentState.qValues[ac.ordinal()];
+			if (tmp > max) {
+				max = tmp;
+				currentState.action = ac;
+			}
 		}
 		
 		return max;
@@ -185,12 +200,13 @@ public class QLearning {
 	
 	public void printMaze() {
 		String niceOutput;
+		double[][] utilities = trials.get(trials.size()-1).utilities;
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[i].length; j++) {
 				if (maze[i][j].wall) {
 					niceOutput = String.format("%1$8s", "%%%");
 				} else {
-					niceOutput = String.format("%1$8.3f", maze[i][j].utility);
+					niceOutput = String.format("%1$8.3f", utilities[i][j]);
 				}
                 System.out.print(niceOutput);
 			}
@@ -232,34 +248,45 @@ public class QLearning {
 	
 	public void printReport() {
 		System.out.println("Printing the values as '(row, column): utility'");
+		double[][] utilities = trials.get(trials.size()-1).utilities;
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[i].length; j++) {
 				if (shouldSkip(maze[i][j])) {
 					continue;
 				}
-				System.out.println("("+i+", "+j+"): "+ maze[i][j].utility);
+				System.out.println("("+i+", "+j+"): "+ utilities[i][j]);
 			}
 		}
 	}
 	
 	public void printReferenceLikeReport() {
 		System.out.println("Printing the values as '(column, row): utility' as the reference values");
+		double[][] utilities = trials.get(trials.size()-1).utilities;
 		for (int j = 0; j < maze[0].length; j++) {
 			for (int i = 0; i < maze.length; i++) {
 				if (shouldSkip(maze[i][j])) {
 					continue;
 				}
-				System.out.println("("+j+", "+i+"): "+ maze[i][j].utility);
+				System.out.println("("+j+", "+i+"): "+ utilities[i][j]);
 			}
 		}
 	}
 	
 	public void printResults() {
+		printLastCoupleRMSE();
 		printMaze();
 		printPolicy();
 		System.out.println("Number of steps: " + steps);
+		System.out.println("Number of trials: " + trials.size());
 //		printReport();
 		printReferenceLikeReport();
+	}
+	
+	public void printLastCoupleRMSE() {
+		for (int i = 99; i >= 0; i--) {
+			TrialData d = trials.get(trials.size()-(1+i));
+			System.out.println("RMSE: " + d.rmse);
+		}
 	}
 	
 	private boolean shouldSkip(QCell c) {
