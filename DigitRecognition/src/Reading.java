@@ -9,7 +9,7 @@ public class Reading {
 	public List<Image> images;
 	public List<Digit> digits;
 
-	public Reading(boolean randomizeWeights) {
+	public Reading(int randomizeWeights) {
 		images = new ArrayList<Image>();
 		digits = new ArrayList<Digit>();
 		for (int i = 0; i < 10; i++) {
