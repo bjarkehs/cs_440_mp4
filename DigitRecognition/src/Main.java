@@ -3,11 +3,13 @@ public class Main {
 
 	public static void main(String[] args) {
 		boolean testWithBinaryFeatures = false;
-		Reading r = new Reading(false);
+		Reading r = new Reading(30);
 		r.readData(testWithBinaryFeatures);
 		Training tr = new Training(r.images, r.digits, 1000);
 		tr.trainData(4, false);
 		//tr.printTrainData();
+		
+//		tr.digits.get(0).printWeights();
 		
 		Testing te = new Testing(tr);
 		te.testData(testWithBinaryFeatures);
