@@ -58,7 +58,7 @@ public class Testing {
 						Digit d = training.digits.get(k);
 						for (int i = 0; i < testImage.length; i++) {
 							for (int j = 0; j < testImage[0].length; j++) {
-								c += d.weight[i][j] * testImage[i][j];
+								c += d.weight[i][j] * testImage[i][j] + training.b;
 							}
 						}
 						if (c > maxC) {
