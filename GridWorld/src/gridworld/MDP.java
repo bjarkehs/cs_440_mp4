@@ -3,12 +3,17 @@ package gridworld;
 //import java.math.BigDecimal;
 //import java.math.MathContext;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 import gridworld.Cell.Action;
 
 public class MDP {
 	public Cell[][] maze;
 	public int iterations;
 	public double convFactor = 0.000001;
+	public List<Double[][]> listOfIterations = new ArrayList<Double[][]>();
 	
 	public MDP(Cell[][] maze) {
 		this.maze = maze;
@@ -40,6 +45,7 @@ public class MDP {
 				}
 			}
 			double error = 0;
+			Double[][] utilities = new Double[maze.length][maze[0].length];
 			for (int i = 0; i < maze.length; i++) {
 				for (int j = 0; j < maze[i].length; j++) {
 					if (shouldSkip(maze[i][j])) {
@@ -47,10 +53,13 @@ public class MDP {
 					}
 					error += Math.pow((maze[i][j].newUtility-maze[i][j].utility), 2);
 					maze[i][j].utility = maze[i][j].newUtility;
+					utilities[i][j] = maze[i][j].utility;
 				}
 			}
+			listOfIterations.add(utilities);
 			error = Math.sqrt(error);
 			System.out.println("ERROR = "+error);
+			
 			if (error <= convFactor) {
 				break;
 			}
@@ -211,6 +220,29 @@ public class MDP {
 		System.out.println("Number of iterations: " + iterations);
 //		printReport();
 		printReferenceLikeReport();
+		createMatLabFile();
+	}
+	
+	public void createMatLabFile() {
+		try {
+			PrintWriter writer = new PrintWriter("valueIter.txt", "UTF-8");
+			for (int n = 0; n < listOfIterations.size(); n++) {
+				Double[][] utilities = listOfIterations.get(n);
+				for (int i = 0; i < utilities.length; i++) {
+					for (int j = 0; j < utilities[i].length; j++) {
+						if (shouldSkip(maze[i][j])) {
+							continue;
+						}
+						writer.print(utilities[i][j]);
+						writer.print(' ');
+					}
+				}
+				writer.println();
+			}
+			writer.close();
+		} catch (Exception e) {
+			e.getStackTrace();
+		}
 	}
 	
 	public double[][] getUtilities() {

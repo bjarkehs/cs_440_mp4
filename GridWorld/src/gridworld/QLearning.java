@@ -1,5 +1,6 @@
 package gridworld;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,9 @@ public class QLearning {
 				}
 				saveRMSE();
 				currentCell = startCell;
-				System.out.println(trials.size());
+				if (trials.size() % 100000 == 0) {
+					System.out.println(trials.size());
+				}
 //				if (trials.size() > 000000) {
 				if (hasConverged()) {
 					break;
@@ -79,7 +82,7 @@ public class QLearning {
 		}
 //		System.out.println("Sum " + sum);
 		double e = Math.sqrt(sum);
-		System.out.println(e);
+//		System.out.println(e);
 		if (e < convFactor) {
 			return true;
 		} else {
@@ -127,7 +130,7 @@ public class QLearning {
 	
 	private double effFunction(double u, int n) {
 		if (n < this.Ne) {
-			return this.Rplus;
+			return this.Rplus - n;
 		} else {
 			return u;
 		}
@@ -280,12 +283,36 @@ public class QLearning {
 		System.out.println("Number of trials: " + trials.size());
 //		printReport();
 		printReferenceLikeReport();
+		createMatLabFile();
 	}
 	
 	public void printLastCoupleRMSE() {
 		for (int i = 99; i >= 0; i--) {
 			TrialData d = trials.get(trials.size()-(1+i));
 			System.out.println("RMSE: " + d.rmse);
+		}
+	}
+	
+	public void createMatLabFile() {
+		try {
+			PrintWriter writer = new PrintWriter("qLearn.txt", "UTF-8");
+			for (int n = 0; n < trials.size(); n++) {
+				TrialData td = trials.get(n);
+				double[][] utilities = td.utilities;
+				for (int i = 0; i < utilities.length; i++) {
+					for (int j = 0; j < utilities[i].length; j++) {
+						if (shouldSkip(maze[i][j])) {
+							continue;
+						}
+						writer.print(utilities[i][j]);
+						writer.print(' ');
+					}
+				}
+				writer.println(td.rmse);
+			}
+			writer.close();
+		} catch (Exception e) {
+			e.getStackTrace();
 		}
 	}
 	

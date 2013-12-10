@@ -14,9 +14,9 @@ public class Main {
 		double[][] trueUtilities = m.getUtilities();
 		
 		QReadMaze qrm = new QReadMaze("maze.txt", -0.04);
-		int Ne = 10;
-		double Rplus = 2;
-		int alphaValue = 1500;
+		int Ne = 15;
+		double Rplus = 80;
+		int alphaValue = 60;
 		QLearning qm = new QLearning(qrm.maze, qrm.startCell, Ne, Rplus, alphaValue, trueUtilities);
 		qm.runAlgorithm(0.99);
 		qm.printResults();
