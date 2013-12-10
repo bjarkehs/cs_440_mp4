@@ -113,7 +113,7 @@ public class Training {
 	}
 	
 	public double getAlpha(int step) {
-		if (alphaParameter == 1) {
+		if (alphaParameter == 0) {
 			return 1;
 		} else {
 			return (double)alphaParameter/(double)(alphaParameter+step);
