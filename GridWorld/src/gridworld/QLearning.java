@@ -41,7 +41,7 @@ public class QLearning {
 				}
 				saveRMSE();
 				currentCell = startCell;
-//				System.out.println(trials.size());
+				System.out.println(trials.size());
 //				if (trials.size() > 000000) {
 				if (hasConverged()) {
 					break;
@@ -51,15 +51,6 @@ public class QLearning {
 //			System.out.println("Current state: " + currentCell.row + "," + currentCell.col);
 			Action a = getNextAction(currentCell);
 			QCell nextCell = getState(currentCell, a);
-			if (currentCell.row == 4 && currentCell.col == 4) {
-				System.out.println("Action: " + a);
-				System.out.println("Next state: " + nextCell.row + ", " + nextCell.col);
-			}
-			if (currentCell.row == 5 && currentCell.col == 4) {
-				System.out.println("THE SPECIAL ONE");
-				System.out.println("Action: " + a);
-				System.out.println("Next state: " + nextCell.row + ", " + nextCell.col);
-			}
 			currentCell.qValues[a.ordinal()] = currentCell.qValues[a.ordinal()] + getAlpha() * (currentCell.reward + gamma * getMaxQ(nextCell) - currentCell.qValues[a.ordinal()]);
 //			System.out.println(currentCell.qValues[a.ordinal()]);
 			currentCell = nextCell;
@@ -88,7 +79,7 @@ public class QLearning {
 		}
 //		System.out.println("Sum " + sum);
 		double e = Math.sqrt(sum);
-//		System.out.println(e);
+		System.out.println(e);
 		if (e < convFactor) {
 			return true;
 		} else {
@@ -113,7 +104,7 @@ public class QLearning {
 	}
 	
 	private double getAlpha() {
-		return (double)alphaValue/(double)((alphaValue-1)+trials.size());
+		return (double)alphaValue/(double)((alphaValue-1)+steps);
 	}
 	
 	private Action getNextAction(QCell currentState) {
@@ -136,7 +127,7 @@ public class QLearning {
 	
 	private double effFunction(double u, int n) {
 		if (n < this.Ne) {
-			return this.Rplus-n;
+			return this.Rplus;
 		} else {
 			return u;
 		}
