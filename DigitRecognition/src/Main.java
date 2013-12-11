@@ -7,7 +7,7 @@ public class Main {
 		r.readData(testWithBinaryFeatures);
 		Training tr = new Training(r.images, r.digits, 500, 0);
 		tr.trainData(5, false);
-		//tr.printTrainData();
+//		tr.printTrainData();
 		
 //		tr.digits.get(0).printWeights();
 		
