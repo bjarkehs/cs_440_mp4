@@ -10,9 +10,9 @@ public class Training {
 	public int[][] hitMatrix;
 	public double[][] confusionMatrix;
 	public List<Integer> epochAccuracy;
-	public int b;
+	public double[] b;
 	
-	public Training(List<Image> images, List<Digit> digits, int alphaParameter, int bias) {
+	public Training(List<Image> images, List<Digit> digits, int alphaParameter, double[] bias) {
 		this.alphaParameter = alphaParameter;
 		this.images = images;
 		this.digits = digits;
@@ -40,7 +40,7 @@ public class Training {
 					Digit d = digits.get(k);
 					for (int i = 0; i < img.features.length; i++) {
 						for (int j = 0; j < img.features[0].length; j++) {
-							c += d.weight[i][j] * img.features[i][j] + b;
+							c += d.weight[i][j] * img.features[i][j] + b[k];
 						}
 					}
 					if (c > maxC) {
