@@ -130,7 +130,7 @@ public class QLearning {
 	
 	private double effFunction(double u, int n) {
 		if (n < this.Ne) {
-			return this.Rplus - n;
+			return this.Rplus;
 		} else {
 			return u;
 		}
