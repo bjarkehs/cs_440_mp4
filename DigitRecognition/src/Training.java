@@ -16,6 +16,9 @@ public class Training {
 		this.alphaParameter = alphaParameter;
 		this.images = images;
 		this.digits = digits;
+		if (bias == null) {
+			bias = new double[10];
+		}
 		this.b = bias;
 		epochAccuracy = new ArrayList<Integer>();
 	}
